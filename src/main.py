@@ -42,7 +42,7 @@ class ImageFactory:
 
         return img
 
-    def create_template_img(self, art_path: os.PathLike) -> Image:
+    def _create_template_img(self, art_path: os.PathLike) -> Image:
         check_path(art_path)
         art_img = Image.open(art_path)
 
@@ -53,7 +53,7 @@ class ImageFactory:
 
         self.img = img
 
-    def add_title(self, title: str) -> Image:
+    def _add_title(self, title: str) -> Image:
         if self.img is None:
             raise Exception("No image to add title to")
 
@@ -79,7 +79,7 @@ class ImageFactory:
 
         return self.img
 
-    def add_image(self, img_path: os.PathLike = "templates/default.png") -> Image:
+    def _add_image(self, img_path: os.PathLike = "templates/default.png") -> Image:
         if self.img is None:
             raise Exception(
                 "No image. Generate one by calling the create_template_img method"
@@ -97,14 +97,13 @@ class ImageFactory:
         self.img.save("output.png")
         return self.img
 
-    def add_description(self, description: str) -> Image:
+    def _add_description(self, description: str) -> Image:
         if self.img is None:
             raise Exception(
                 "There is no image to add description to. Generate one by using the create_template_img method"
             )
         text_width = 25
         text_size = 50
-        print(len(description))
         if len(description) > 200:
             text_width = 35
             text_size = 35
@@ -138,17 +137,26 @@ class ImageFactory:
         self.img.save("output.png")
         return self.img
 
+    def generate(
+        self,
+        /,
+        title: str,
+        description: str,
+        art_img_path: os.PathLike = "templates/art.png",
+        img_path: os.PathLike = "templates/default.png",
+        save_path: os.PathLike = "output.png",
+    ) -> Image:
+        self._create_template_img(art_img_path)
+        self._add_title(title)
+        self._add_description(description)
+        self._add_image(img_path)
+
+        self.img.save(save_path)
+
+        return self.img
+
 
 if __name__ == "__main__":
     image_factory = ImageFactory()
-    img = image_factory.create_template_img("templates/art.png")
 
-    image_factory.add_title(
-        "This website doesn't have an API, so I remade the entire website, and made a Twitter bot."
-    )
-
-    image_factory.add_image()
-
-    image_factory.add_description(
-        "The poet this twitter bot i had earlier, had several issues, like being too expensive to host, and not being able to use reliably. It was time to change this."
-    )
+    image_factory.generate(title="Create the fastest search for your website in minutes, without any dependencies", description="In the world of algolia, Typesense and what not, I chose the simplest and fastest way. How I made the search feature for this blog", save_path="output.png")
