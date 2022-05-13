@@ -9,7 +9,14 @@ install()
 
 from helpers import check_path, do_download, cleanup
 from _types import Coordinates, rgb
-from config import BG_COLOR, ART_POSITION, TITLE_POSITION, IMG_POSITION
+from config import (
+    BG_COLOR,
+    ART_POSITION,
+    TITLE_POSITION,
+    IMG_POSITION,
+    FOOTER_POSITION,
+    FOOTER,
+)
 
 
 class ImageFactory:
@@ -146,6 +153,37 @@ class ImageFactory:
         self.img.save("output.png")
         return self.img
 
+    def _add_footer(self, tags:list = None) -> Image:
+        if self.img is None:
+            raise Exception(
+                "There is no image to add footer to. Generate one by using the create_template_img method"
+            )
+        footer_font = ImageFont.truetype(r"templates\jetbrains_mono.ttf", size=40)
+
+        # Paste footer text
+        draw = ImageDraw.Draw(self.img)
+        draw.text(
+            (FOOTER_POSITION.x, FOOTER_POSITION.y),
+            FOOTER,
+            font=footer_font,
+            fill=rgb(200, 200, 255),
+        )
+
+        tag_x = self.img.size[0] - 130
+        tag_y = IMG_POSITION.y + 600
+
+        # Adding footers
+        if tags:
+            for tag in tags:
+                if os.path.exists(f"./icons/{tag}.png"):
+                    img = Image.open(f"./icons/{tag}.png")
+                    img = img.resize((100, 100))
+                    self.img.paste(img, (tag_x, tag_y), img)
+                    tag_x -= 120
+
+
+        return self.img
+
     def generate(
         self,
         /,
@@ -154,6 +192,7 @@ class ImageFactory:
         art_img_path: os.PathLike = "templates/art.png",
         img_path: os.PathLike = "templates/default.png",
         save_path: os.PathLike = "output.png",
+        tags: list = None,
     ) -> Image:
 
         if str(art_img_path).startswith("https://"):
@@ -166,6 +205,7 @@ class ImageFactory:
         self._add_title(title)
         self._add_description(description)
         self._add_image(img_path)
+        self._add_footer(tags=tags)
 
         self.img.save(save_path)
         cleanup()
@@ -179,4 +219,5 @@ if __name__ == "__main__":
         title="Create the fastest search for your website in minutes, without any dependencies",
         description="In the world of algolia, Typesense and what not, I chose the simplest and fastest way. How I made the search feature for this blog",
         art_img_path="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Search_Icon.svg/1024px-Search_Icon.svg.png",
+        tags = ["javascript", "react"]
     )
