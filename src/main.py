@@ -1,13 +1,13 @@
 import os
-
 import textwrap
+
 from rich import print
 from rich.traceback import install
 from PIL import Image, ImageDraw, ImageFont
 
 install()
 
-from helpers import check_path
+from helpers import check_path, do_download, cleanup
 from _types import Coordinates, rgb
 from config import BG_COLOR, ART_POSITION, TITLE_POSITION, IMG_POSITION
 
@@ -48,8 +48,16 @@ class ImageFactory:
 
         # Create img with 2240, 1260
         img = Image.new("RGB", (2240, 1260), BG_COLOR)
-        art_img = art_img.resize((ART_POSITION.size))
-        img.paste(art_img, (ART_POSITION.x, ART_POSITION.y), art_img)
+        art_img = art_img.resize(
+            (
+                ART_POSITION.size[0],
+                int(ART_POSITION.size[0] * art_img.size[1] / art_img.size[0]),
+            ),
+        )
+        try:
+            img.paste(art_img, (ART_POSITION.x, ART_POSITION.y), art_img)
+        except ValueError:
+            img.paste(art_img, (ART_POSITION.x, ART_POSITION.y))
 
         self.img = img
 
@@ -90,7 +98,8 @@ class ImageFactory:
 
         img = img.resize((1280, int(1280 * img.size[1] / img.size[0])))
 
-        # img = img.crop((0, 0, img.size[0], img.size[0] / 1.777))
+        if img.size[1] > 720:
+            img = img.crop((0, 0, img.size[0], img.size[0] / 1.777))
 
         img = self._round_corners(img, 40)
         self.img.paste(img, (IMG_POSITION.x, IMG_POSITION.y), img)
@@ -146,17 +155,28 @@ class ImageFactory:
         img_path: os.PathLike = "templates/default.png",
         save_path: os.PathLike = "output.png",
     ) -> Image:
+
+        if str(art_img_path).startswith("https://"):
+            art_img_path = do_download(art_img_path, "art.temp.png")
+
+        if str(img_path).startswith("https://"):
+            img_path = do_download(img_path, "img.temp.png")
+
         self._create_template_img(art_img_path)
         self._add_title(title)
         self._add_description(description)
         self._add_image(img_path)
 
         self.img.save(save_path)
-
+        cleanup()
         return self.img
 
 
 if __name__ == "__main__":
     image_factory = ImageFactory()
 
-    image_factory.generate(title="Create the fastest search for your website in minutes, without any dependencies", description="In the world of algolia, Typesense and what not, I chose the simplest and fastest way. How I made the search feature for this blog", save_path="output.png")
+    image_factory.generate(
+        title="Create the fastest search for your website in minutes, without any dependencies",
+        description="In the world of algolia, Typesense and what not, I chose the simplest and fastest way. How I made the search feature for this blog",
+        art_img_path="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Search_Icon.svg/1024px-Search_Icon.svg.png",
+    )
