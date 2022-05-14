@@ -227,13 +227,3 @@ class ImageFactory:
 
         return self.img
 
-
-if __name__ == "__main__":
-    image_factory = ImageFactory()
-
-    image_factory.generate(
-        title="How to Supercharge your terminal with starship",
-        description="How I customized my terminal to look really good using Starship, Powershell and Nerd Fonts",
-        save_path=r"C:\Users\dhrav\Documents\websites\old.dhravya.dev\blog\content\blog\how-to-supercharge-terminal\og-image.png",
-        img_path="https://blog.dhravya.dev/static/2a13cbd4c57eb48d0c58325549d1d414/f8e4d/cover.png"
-    )
