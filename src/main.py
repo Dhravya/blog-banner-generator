@@ -109,7 +109,10 @@ class ImageFactory:
             img = img.crop((0, 0, img.size[0], img.size[0] / 1.777))
 
         img = self._round_corners(img, 40)
-        self.img.paste(img, (IMG_POSITION.x, IMG_POSITION.y), img)
+        try:
+            self.img.paste(img, (IMG_POSITION.x, IMG_POSITION.y), img)
+        except ValueError:
+            self.img.paste(img, (IMG_POSITION.x, IMG_POSITION.y))
         self.img.save("output.png")
         return self.img
 
@@ -184,6 +187,14 @@ class ImageFactory:
 
         return self.img
 
+    def resize(self, width) -> Image:
+        if self.img is None:
+            raise Exception("No image to resize")
+
+        self.img = self.img.resize((width, 630))
+
+        return self.img
+
     def generate(
         self,
         /,
@@ -193,6 +204,7 @@ class ImageFactory:
         img_path: os.PathLike = "templates/default.png",
         save_path: os.PathLike = "output.png",
         tags: list = None,
+        resize_width: int = None,
     ) -> Image:
 
         if str(art_img_path).startswith("https://"):
@@ -207,8 +219,12 @@ class ImageFactory:
         self._add_image(img_path)
         self._add_footer(tags=tags)
 
+        if resize_width:
+            self.resize(resize_width)
+
         self.img.save(save_path)
         cleanup()
+
         return self.img
 
 
@@ -216,8 +232,8 @@ if __name__ == "__main__":
     image_factory = ImageFactory()
 
     image_factory.generate(
-        title="Create the fastest search for your website in minutes, without any dependencies",
-        description="In the world of algolia, Typesense and what not, I chose the simplest and fastest way. How I made the search feature for this blog",
-        art_img_path="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Search_Icon.svg/1024px-Search_Icon.svg.png",
-        tags = ["javascript", "react"]
+        title="How to Supercharge your terminal with starship",
+        description="How I customized my terminal to look really good using Starship, Powershell and Nerd Fonts",
+        save_path=r"C:\Users\dhrav\Documents\websites\old.dhravya.dev\blog\content\blog\how-to-supercharge-terminal\og-image.png",
+        img_path="https://blog.dhravya.dev/static/2a13cbd4c57eb48d0c58325549d1d414/f8e4d/cover.png"
     )

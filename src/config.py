@@ -1,6 +1,6 @@
 from _types import Coordinates, rgb
 
-BG_COLOR = rgb(56, 13, 121)
+BG_COLOR = rgb(8, 89, 140)
 ART_POSITION = Coordinates(x=15, y=15, size=(430, 430))
 TITLE_POSITION = Coordinates(x=550, y=30)
 
